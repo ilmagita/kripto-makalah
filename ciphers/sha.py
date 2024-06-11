@@ -1,7 +1,7 @@
 import hashlib
 
 # keccak hash
-def generate_keccak_hash(data, bit_length=256):
+def hash_message(data, bit_length=256):
     if bit_length == 224:
         hash_obj = hashlib.sha3_224()
     elif bit_length == 256:

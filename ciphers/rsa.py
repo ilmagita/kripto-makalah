@@ -8,6 +8,27 @@ def generate_large_prime():
         number = random.randint(1, 9999999999)
         if sympy.isprime(number):
             return number
+        
+def next_prime(n):
+    """Generate the next closest prime number if n is not a prime."""
+    if n <= 1:
+        return 2
+    prime = n
+    found = False
+    
+    if sympy.isprime(prime):
+        found = True
+
+    while not found:
+        prime += 1
+        if sympy.isprime(prime):
+            found = True
+    return prime
+
+def reverse_number(number):
+    reversed_str = str(number)[::-1]
+    reversed_number = int(reversed_str)
+    return reversed_number
 
 ## RSA FUNCTIONS
 def generate_public_key(p, q, e):
@@ -21,9 +42,11 @@ def generate_private_key(p, q, e):
 def is_relative_prime(a, b):
     return gcd(a, b) == 1
 
-def generate_rsa_key():
-    p = generate_large_prime()
-    q = generate_large_prime()
+def generate_rsa_key(birthdate=27022003):
+    birthdate = next_prime(birthdate)
+    reversed_birthdate = next_prime(reverse_number(birthdate))
+    p = birthdate
+    q = reversed_birthdate
 
     while p == q:
         q = generate_large_prime()
@@ -44,6 +67,6 @@ def generate_rsa_key():
     }
 
 # ## EXAMPLE USAGE
-# keys = generate_rsa_key()
+# keys = generate_rsa_key(27022003)
 # print(keys)
 
