@@ -1,51 +1,46 @@
-import hashlib
-import os
-
 import os
 import hashlib
 
-def hash_file(file_path):
-    # Calculate the hash of the file contents
-    hash_obj = hashlib.sha3_256()
+def hash_binary_file(file_path):
     with open(file_path, 'rb') as file:
-        while True:
-            chunk = file.read(4096)  # Read in chunks to handle large files
-            if not chunk:
-                break
-            hash_obj.update(chunk)
-    return hash_obj.digest()
+        binary_data = file.read()
+
+    ascii_text = binary_data.decode('ascii', errors='ignore')
+
+    hash_obj = hashlib.sha3_256()
+    hash_obj.update(ascii_text.encode('utf-8'))
+    hashed_result = hash_obj.digest()
+
+    hashed_result_int_array = [byte for byte in hashed_result]
+    return hashed_result_int_array
 
 def sign_file(file_path, d, n):
-    signature = pow(int.from_bytes(hash_file(file_path), byteorder='big'), d, n)
-    base_name, file_extension = os.path.splitext(file_path)
+    hashed_int_array = hash_binary_file(file_path)
+
+    signature_array = []
+
+    for ch in hashed_int_array:
+        signature = pow(ch, d, n)
+        signature_array.append(signature)
+
+    base_name, _ = os.path.splitext(file_path)
+
     with open(base_name + '_signature.txt', 'w') as signature_file:
-        signature_file.write(hex(signature))
+        signature_file.write(str(signature_array))
 
 def verify_signature(file_path, signature_path, e, n):
-    file_hash = hash_file(file_path)
+    hashed_int_array = hash_binary_file(file_path)
+
     with open(signature_path, 'r') as signature_file:
-        signature = int(signature_file.read(), 16)
-    decrypted_signature = pow(signature, e, n)
-    return file_hash == decrypted_signature.to_bytes((decrypted_signature.bit_length() + 7) // 8, byteorder='big')
+        content = signature_file.read()
+    
+    content = content.replace('[', '').replace(']', '')
+    signature_array = [int(byte) for byte in content.split(',')]
 
+    decrypted_array = []
 
-# Example usage
+    for ch in signature_array:
+        decrypted = pow(ch, e, n)
+        decrypted_array.append(decrypted)
 
-
-# RSA parameters
-e = 4736592089
-d = 795027992716457
-n = 811256546672219
-
-# Ensure the RSA keys satisfy the RSA relationship
-print(f"e: {e}, d: {d}, n: {n}")
-
-file_path = os.path.join(os.path.dirname(__file__), 'test.png')
-
-with open(file_path, 'rb') as file:
-    contents = file.read()
-
-sign_file(file_path, d, n)
-signature_path = os.path.join(os.path.dirname(__file__), 'test_signature.txt')
-is_verified = verify_signature(file_path, signature_path, e, n)
-print(f"Is signature verified: {is_verified}")
+    return hashed_int_array == decrypted_array

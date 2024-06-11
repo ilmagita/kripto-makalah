@@ -34,6 +34,13 @@ def int_array_to_binary_data(array_of_integers):
     return binary_data
 
 ## ENCRYPTION AND DECRYPTION
+def encrypt(message, d, n): 
+    return ''.join(hex(pow(ord(m), d, n)) for m in message)
+
+def decrypt(cipher, e, n):
+    cipher = [int(x, 16) for x in cipher.split('0x')[1:]]
+
+    return ''.join(chr(pow(c, e, n)) for c in cipher)
 
 def encrypt_file(file_path, e, n):
     base_name, file_extension = os.path.splitext(file_path)

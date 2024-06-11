@@ -1,7 +1,6 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
 from PyQt5 import uic
 from algorithms import signing
-from ciphers import sha
 import sys
 
 class MainApp(QMainWindow):
@@ -18,6 +17,7 @@ class MainApp(QMainWindow):
         self.filePath = ''
         self.fileType = ''
         self.fileContents = None
+        self.signatureFilePath = ''
 
         self.priKeyFromFile = None
         self.pubKeyFromFile = None
@@ -54,16 +54,12 @@ class MainApp(QMainWindow):
 
     def signButtonClicked(self):
         if self.priKeyFromFile is not None and self.pubKeyFromFile is not None:
-            with open (self.filePath, 'rb') as file:
-                data = file.read()
-                self.fileContents = data
 
             d = self.priKeyFromFile['privKey']['d']
             n = self.priKeyFromFile['privKey']['n']
             
-            hashed_message = sha.hash_message(data)
-            signature = signing.sign_message(data, d, n)
-            self.signatureText.setPlainText(f"Hashed Message: {hashed_message}\nSignature: {signature}")
+            signature = signing.sign_file(self.filePath, d, n)
+            self.signatureText.setPlainText(f"Signature saved in the same folder.")
 
             with open ('./signature/sign.txt', 'w') as signature_file:
                 signature_file.write(str(signature))
@@ -75,7 +71,7 @@ class MainApp(QMainWindow):
         with open(self.filePath, 'rb') as file:
             data = file.read()
 
-        if signing.verify_signature(self.fileContents, self.signatureFromFile, e, n):
+        if signing.verify_signature(self.filePath, self.signatureFilePath, e, n):
             self.signatureText.setPlainText('Signature verified!')
         else:
             self.signatureText.setPlainText('Signature not verified!')
@@ -102,7 +98,7 @@ class MainApp(QMainWindow):
         if signature_file_path:
             with open (signature_file_path, 'r') as signature_file:
                 signature = signature_file.read()
-                self.signatureFromFile = int(signature)
+                self.signatureFilePath = signature_file_path
 
             self.signatureText.setPlainText(f"""HASHED SIGNATURE BEGIN
                                                 {signature}
