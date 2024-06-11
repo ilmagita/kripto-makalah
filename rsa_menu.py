@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QApplication
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
 from PyQt5 import uic
 import sys
 from ciphers import rsa
@@ -17,6 +17,7 @@ class MainApp(QMainWindow):
         self.filePath = ''
         self.priKeyUploaded = False
         self.pubKeyUploaded = False
+        self.keyGenerated = False
 
         # connection slots
         self.encryptChoice.clicked.connect(self.encryptChoiceClicked)
