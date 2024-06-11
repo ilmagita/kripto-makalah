@@ -75,7 +75,7 @@ class MainApp(QMainWindow):
         with open(self.filePath, 'rb') as file:
             data = file.read()
 
-        if signing.verify_signature(data, self.signatureFromFile, e, n):
+        if signing.verify_signature(self.fileContents, self.signatureFromFile, e, n):
             self.signatureText.setPlainText('Signature verified!')
         else:
             self.signatureText.setPlainText('Signature not verified!')

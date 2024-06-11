@@ -1,27 +1,36 @@
 import hashlib
 import os
 
-def sign_message(plaintext, d, n):
+import os
+import hashlib
+
+def hash_file(file_path):
+    # Calculate the hash of the file contents
     hash_obj = hashlib.sha3_256()
-    hash_obj.update(plaintext)
-    hashed_message = hash_obj.hexdigest()
-    print(f"Hashed message (sign): {hashed_message}")
+    with open(file_path, 'rb') as file:
+        while True:
+            chunk = file.read(4096)  # Read in chunks to handle large files
+            if not chunk:
+                break
+            hash_obj.update(chunk)
+    return hash_obj.digest()
 
-    signature = pow(int(hashed_message, 16), d, n)
-    print(f"Signature: {signature}")
-    return signature
+def sign_file(file_path, d, n):
+    signature = pow(int.from_bytes(hash_file(file_path), byteorder='big'), d, n)
+    base_name, file_extension = os.path.splitext(file_path)
+    with open(base_name + '_signature.txt', 'w') as signature_file:
+        signature_file.write(hex(signature))
 
-def verify_signature(plaintext, signature, e, n):
-    hash_obj = hashlib.sha3_256()
-    hash_obj.update(plaintext)
-    hashed_message = hash_obj.hexdigest()
-    print(f"Hashed message (verify): {hashed_message}")
-
+def verify_signature(file_path, signature_path, e, n):
+    file_hash = hash_file(file_path)
+    with open(signature_path, 'r') as signature_file:
+        signature = int(signature_file.read(), 16)
     decrypted_signature = pow(signature, e, n)
-    print(f"Decrypted signature: {decrypted_signature}")
-    calculated_hash = int(hashed_message, 16)
-    
-    return decrypted_signature == calculated_hash
+    return file_hash == decrypted_signature.to_bytes((decrypted_signature.bit_length() + 7) // 8, byteorder='big')
+
+
+# Example usage
+
 
 # RSA parameters
 e = 4736592089
@@ -36,6 +45,7 @@ file_path = os.path.join(os.path.dirname(__file__), 'test.png')
 with open(file_path, 'rb') as file:
     contents = file.read()
 
-signed = sign_message(contents, d, n)
-is_verified = verify_signature(contents, signed, e, n)
+sign_file(file_path, d, n)
+signature_path = os.path.join(os.path.dirname(__file__), 'test_signature.txt')
+is_verified = verify_signature(file_path, signature_path, e, n)
 print(f"Is signature verified: {is_verified}")

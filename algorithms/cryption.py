@@ -34,17 +34,6 @@ def int_array_to_binary_data(array_of_integers):
     return binary_data
 
 ## ENCRYPTION AND DECRYPTION
-# def encrypt(plaintext, e, n):
-#     cipher = ''.join(hex(pow(ord(char),e,n)) for char in plaintext)
-#     return utf8_to_base64(str(cipher))
-
-# def decrypt(ciphertext, d, n):
-#     cipher = base64_to_utf8(cipher).split('0x')
-#     cipher = cipher[1:]
-#     plain = [pow(int('0x'+c,16),d,n) for c in cipher]
-#     plaintext = "".join(chr(p) for p in plain)
-
-#     return plaintext
 
 def encrypt_file(file_path, e, n):
     base_name, file_extension = os.path.splitext(file_path)
